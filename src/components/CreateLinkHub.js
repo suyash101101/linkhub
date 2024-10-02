@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';  // Import useState from React
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation
+import { supabase } from '../supabaseClient';  // Import supabase client
 
 const CreateLinkHub = () => {
   const [username, setUsername] = useState('');
   const [links, setLinks] = useState([{ title: '', url: '' }]);
-  const [theme, setTheme] = useState('light'); // Theme state
+  const [theme, setTheme] = useState('light');
   const navigate = useNavigate();
 
   const addLink = () => {
@@ -20,42 +20,42 @@ const CreateLinkHub = () => {
   };
 
   const handleSubmit = async () => {
-    // Check if username already exists
     const { data: existingUser, error: fetchError } = await supabase
       .from('profiles')
       .select('*')
       .eq('username', username);
 
-    if (fetchError) {
-      console.error('Error fetching profile:', fetchError);
-      return;
-    }
-
     if (existingUser && existingUser.length > 0) {
-      // Username exists, alert the user
-      alert('Username already exists, please choose another one.');
+      alert('Username already exists. Please choose another one.');
       return;
     }
 
-    // If username does not exist, proceed with inserting data
     const { data, error } = await supabase
       .from('profiles')
       .insert([{ username, links, theme }]);
 
     if (!error) {
       navigate(`/${username}`);
-    } else {
-      console.error('Error inserting profile:', error);
     }
   };
 
+  // Apply different theme classes based on theme state
+  const themeClass =
+    theme === 'dark'
+      ? 'bg-gray-900 text-white'
+      : theme === 'blue'
+      ? 'bg-blue-500 text-white'
+      : theme === 'green'
+      ? 'bg-green-500 text-white'
+      : 'bg-white text-black';
+
   return (
-    <div className="container mx-auto p-4">
+    <div className={`container mx-auto p-4 ${themeClass}`}>
       <h1 className="text-2xl font-bold mb-4">Create Your LinkHub</h1>
       <input
         type="text"
         placeholder="Username"
-        className="border p-2 rounded mb-4"
+        className="border p-2 rounded mb-4 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
@@ -65,7 +65,7 @@ const CreateLinkHub = () => {
             type="text"
             name="title"
             placeholder="Link Title"
-            className="border p-2 rounded"
+            className="border p-2 rounded bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
             value={link.title}
             onChange={(e) => handleChange(e, index)}
           />
@@ -73,7 +73,7 @@ const CreateLinkHub = () => {
             type="url"
             name="url"
             placeholder="Link URL"
-            className="border p-2 rounded ml-2"
+            className="border p-2 rounded ml-2 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
             value={link.url}
             onChange={(e) => handleChange(e, index)}
           />
@@ -84,9 +84,8 @@ const CreateLinkHub = () => {
         Add Another Link
       </button>
 
-      {/* Theme selection */}
       <select
-        className="border p-2 rounded ml-4"
+        className="border p-2 rounded ml-4 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
         value={theme}
         onChange={(e) => setTheme(e.target.value)}
       >

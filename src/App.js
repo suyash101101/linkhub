@@ -22,6 +22,7 @@ function App() {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
+      <ThemeToggle theme={theme} onThemeChange={handleThemeChange} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create-linkhub" element={<CreateLinkHub onThemeChange={handleThemeChange} />} />
