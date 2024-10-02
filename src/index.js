@@ -1,16 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';  // Tailwind CSS styles
+import ReactDOM from 'react-dom/client'; // Import from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'; 
 import App from './App';
 
-// Create the root element for rendering the app
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
-// Render the main App component inside the root element
+const root = ReactDOM.createRoot(document.getElementById('root')); // Use createRoot here
 root.render(
-  <React.StrictMode>
+  <BrowserRouter>
     <App />
-  </React.StrictMode>
+  </BrowserRouter>
 );
-
-// No need for reportWebVitals, so it's removed
