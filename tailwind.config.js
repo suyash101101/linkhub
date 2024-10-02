@@ -1,8 +1,13 @@
 module.exports = {
-  darkMode: 'class',  // Add this line to enable dark mode
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: 'class', // Enable dark mode
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'blue': '#007BFF',
+        'green': '#28a745',
+      },
+    },
   },
   plugins: [],
 };

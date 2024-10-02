@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 
 const Profile = () => {
-  const { username } = useParams();  // Captures username from the URL
+  const { username } = useParams();
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
@@ -11,10 +11,21 @@ const Profile = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('username', username)  // Fetches data for the specific username
-        .single();
-      
-      if (!error) setProfile(data);
+        .eq('username', username)
+        .single(); // Ensure fetching only one profile
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      setProfile(data);
+
+      // Apply saved theme
+      if (data?.theme) {
+        document.documentElement.classList.remove('light', 'dark', 'blue', 'green');
+        document.documentElement.classList.add(data.theme);
+      }
     };
 
     fetchProfile();
@@ -23,12 +34,19 @@ const Profile = () => {
   if (!profile) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{username}'s LinkHub</h1>
-      <ul>
+    <div className="container mx-auto p-6 space-y-4">
+      <h1 className="text-3xl font-bold">{username}'s LinkHub</h1>
+      <ul className="space-y-2">
         {profile.links.map((link, index) => (
           <li key={index} className="mb-2">
-            <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{link.title}</a>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              {link.title}
+            </a>
           </li>
         ))}
       </ul>
@@ -37,3 +55,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

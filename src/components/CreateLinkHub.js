@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const CreateLinkHub = () => {
   const [username, setUsername] = useState('');
   const [links, setLinks] = useState([{ title: '', url: '' }]);
+  const [theme, setTheme] = useState('light'); // Theme state
   const navigate = useNavigate();
 
   const addLink = () => {
@@ -12,20 +13,41 @@ const CreateLinkHub = () => {
   };
 
   const handleChange = (e, index) => {
-    const updatedLinks = links.map((link, i) => i === index ? { ...link, [e.target.name]: e.target.value } : link);
+    const updatedLinks = links.map((link, i) =>
+      i === index ? { ...link, [e.target.name]: e.target.value } : link
+    );
     setLinks(updatedLinks);
   };
 
   const handleSubmit = async () => {
+    // Check if username already exists
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username);
+
+    if (fetchError) {
+      console.error('Error fetching profile:', fetchError);
+      return;
+    }
+
+    if (existingUser && existingUser.length > 0) {
+      // Username exists, alert the user
+      alert('Username already exists, please choose another one.');
+      return;
+    }
+
+    // If username does not exist, proceed with inserting data
     const { data, error } = await supabase
       .from('profiles')
-      .insert([{ username, links }]);
-  
+      .insert([{ username, links, theme }]);
+
     if (!error) {
-      navigate(`/${username}`);  // Redirects to /username after submission
+      navigate(`/${username}`);
+    } else {
+      console.error('Error inserting profile:', error);
     }
   };
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -57,11 +79,33 @@ const CreateLinkHub = () => {
           />
         </div>
       ))}
-      <button className="bg-green-500 text-white p-2 rounded" onClick={addLink}>Add Another Link</button>
-      <button className="bg-blue-500 text-white p-2 rounded ml-4" onClick={handleSubmit}>Submit</button>
+
+      <button className="bg-green-500 text-white p-2 rounded" onClick={addLink}>
+        Add Another Link
+      </button>
+
+      {/* Theme selection */}
+      <select
+        className="border p-2 rounded ml-4"
+        value={theme}
+        onChange={(e) => setTheme(e.target.value)}
+      >
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+      </select>
+
+      <button
+        className="bg-blue-500 text-white p-2 rounded ml-4"
+        onClick={handleSubmit}
+      >
+        Submit
+      </button>
     </div>
   );
 };
-console.log("Home component loaded");
 
 export default CreateLinkHub;
+
+
