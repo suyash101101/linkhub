@@ -1,11 +1,10 @@
-import React, { useState } from 'react';  // Import useState from React
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation
-import { supabase } from '../supabaseClient';  // Import supabase client
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const CreateLinkHub = () => {
   const [username, setUsername] = useState('');
   const [links, setLinks] = useState([{ title: '', url: '' }]);
-  const [theme, setTheme] = useState('light');
   const navigate = useNavigate();
 
   const addLink = () => {
@@ -20,42 +19,33 @@ const CreateLinkHub = () => {
   };
 
   const handleSubmit = async () => {
-    const { data: existingUser, error: fetchError } = await supabase
+    const { data: existingProfile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('username', username);
+      .eq('username', username)
+      .single();
 
-    if (existingUser && existingUser.length > 0) {
-      alert('Username already exists. Please choose another one.');
+    if (existingProfile) {
+      alert('Username already exists, please choose another.');
       return;
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
-      .insert([{ username, links, theme }]);
+      .insert([{ username, links, theme: 'light' }]);
 
     if (!error) {
-      navigate(`/${username}`);
+      navigate(`/profile/${username}`); // Ensure the dynamic routing is correct
     }
   };
 
-  // Apply different theme classes based on theme state
-  const themeClass =
-    theme === 'dark'
-      ? 'bg-gray-900 text-white'
-      : theme === 'blue'
-      ? 'bg-blue-500 text-white'
-      : theme === 'green'
-      ? 'bg-green-500 text-white'
-      : 'bg-white text-black';
-
   return (
-    <div className={`container mx-auto p-4 ${themeClass}`}>
+    <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Create Your LinkHub</h1>
       <input
         type="text"
         placeholder="Username"
-        className="border p-2 rounded mb-4 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
+        className="border p-2 rounded mb-4"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
@@ -65,7 +55,7 @@ const CreateLinkHub = () => {
             type="text"
             name="title"
             placeholder="Link Title"
-            className="border p-2 rounded bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
+            className="border p-2 rounded"
             value={link.title}
             onChange={(e) => handleChange(e, index)}
           />
@@ -73,32 +63,16 @@ const CreateLinkHub = () => {
             type="url"
             name="url"
             placeholder="Link URL"
-            className="border p-2 rounded ml-2 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
+            className="border p-2 rounded ml-2"
             value={link.url}
             onChange={(e) => handleChange(e, index)}
           />
         </div>
       ))}
-
       <button className="bg-green-500 text-white p-2 rounded" onClick={addLink}>
         Add Another Link
       </button>
-
-      <select
-        className="border p-2 rounded ml-4 bg-gray-100 text-black dark:bg-gray-800 dark:text-white"
-        value={theme}
-        onChange={(e) => setTheme(e.target.value)}
-      >
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-      </select>
-
-      <button
-        className="bg-blue-500 text-white p-2 rounded ml-4"
-        onClick={handleSubmit}
-      >
+      <button className="bg-blue-500 text-white p-2 rounded ml-4" onClick={handleSubmit}>
         Submit
       </button>
     </div>
@@ -106,5 +80,4 @@ const CreateLinkHub = () => {
 };
 
 export default CreateLinkHub;
-
 
