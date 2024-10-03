@@ -2,33 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light theme */
-html.light {
-  --bg-color: white;
-  --text-color: black;
-}
-
 /* Dark theme */
-html.dark {
-  --bg-color: #121212;
-  --text-color: white;
+html{
+    --bg-color: #121212; /* Background color for dark mode */
+    --text-color: white; /* Ensure text is always white in dark mode */
 }
 
-/* Apply theme to the entire body */
-body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-}
-
-/* Optional: Update form fields and buttons to reflect the theme */
-input, textarea, button {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border: 1px solid var(--text-color);
-}
-
-select {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border: 1px solid var(--text-color);
-}

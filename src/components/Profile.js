@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import SearchBar from './SearchBar'; // Ensure to import SearchBar
+import { useAuth } from '@clerk/clerk-react';
+import SearchBar from './SearchBar';
 
 const Profile = () => {
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
   const [links, setLinks] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null);
   const [newLink, setNewLink] = useState({ title: '', url: '' });
-  const [editing, setEditing] = useState(null);
+  const { userId } = useAuth();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -27,17 +29,14 @@ const Profile = () => {
     fetchProfile();
   }, [username]);
 
-  const handleDelete = async (index) => {
-    const updatedLinks = links.filter((_, i) => i !== index);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ links: updatedLinks })
-      .eq('username', username);
+  const isAdmin = profile && profile.userId === userId;
 
-    if (!error) setLinks(updatedLinks);
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+    setNewLink(links[index]);
   };
 
-  const handleUpdate = async (index) => {
+  const handleSave = async (index) => {
     const updatedLinks = [...links];
     updatedLinks[index] = newLink;
 
@@ -48,13 +47,18 @@ const Profile = () => {
 
     if (!error) {
       setLinks(updatedLinks);
-      setEditing(null);
+      setEditingIndex(null);
     }
   };
 
-  const handleEdit = (index) => {
-    setEditing(index);
-    setNewLink(links[index]);
+  const handleDelete = async (index) => {
+    const updatedLinks = links.filter((_, i) => i !== index);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ links: updatedLinks })
+      .eq('username', username);
+
+    if (!error) setLinks(updatedLinks);
   };
 
   const handleAdd = async () => {
@@ -76,63 +80,73 @@ const Profile = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{username}'s LinkHub</h1>
       <SearchBar links={links} />
-      <ul>
-        {links.map((link, index) => (
-          <li key={index} className="mb-2">
-            {editing === index ? (
-              <div>
-                <input
-                  type="text"
-                  value={newLink.title}
-                  onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-                  className="p-2 bg-gray-700 text-white rounded"
-                />
-                <input
-                  type="url"
-                  value={newLink.url}
-                  onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-                  className="p-2 bg-gray-700 text-white rounded"
-                />
-                <button onClick={() => handleUpdate(index)} className="ml-2 bg-blue-500 text-white p-2 rounded">Save</button>
-              </div>
-            ) : (
-              <>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500"
-                >
-                  {link.title}
-                </a>
-                <button onClick={() => handleEdit(index)} className="ml-2 bg-yellow-500 text-white p-2 rounded">Edit</button>
-                <button onClick={() => handleDelete(index)} className="ml-2 bg-red-500 text-white p-2 rounded">Delete</button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-      <div>
-        <input
-          type="text"
-          placeholder="New link title"
-          value={newLink.title}
-          onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-          className="p-2 bg-gray-700 text-white rounded"
-        />
-        <input
-          type="url"
-          placeholder="New link URL"
-          value={newLink.url}
-          onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-          className="p-2 bg-gray-700 text-white rounded"
-        />
-        <button onClick={handleAdd} className="ml-2 bg-green-500 text-white p-2 rounded">Add Link</button>
-      </div>
+
+      {links.map((link, index) => (
+        <div key={index} className="mb-4">
+          {editingIndex === index && isAdmin ? (
+            <>
+              <input
+                type="text"
+                value={newLink.title}
+                onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+                className="border p-2 rounded"
+              />
+              <input
+                type="url"
+                value={newLink.url}
+                onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+                className="border p-2 rounded ml-2"
+              />
+              <button onClick={() => handleSave(index)} className="ml-2 bg-blue-500 text-white p-2 rounded">
+                Save
+              </button>
+              <button onClick={() => setEditingIndex(null)} className="ml-2 bg-gray-500 text-white p-2 rounded">
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                {link.title}
+              </a>
+              {isAdmin && (
+                <>
+                  <button onClick={() => handleEdit(index)} className="ml-2 bg-yellow-500 text-white p-2 rounded">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(index)} className="ml-2 bg-red-500 text-white p-2 rounded">
+                    Delete
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      ))}
+
+      {isAdmin && (
+        <div>
+          <input
+            type="text"
+            placeholder="New link title"
+            value={newLink.title}
+            onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+            className="p-2 border rounded"
+          />
+          <input
+            type="url"
+            placeholder="New link URL"
+            value={newLink.url}
+            onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+            className="p-2 border rounded ml-2"
+          />
+          <button onClick={handleAdd} className="ml-2 bg-green-500 text-white p-2 rounded">
+            Add Link
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Profile;
-
-
