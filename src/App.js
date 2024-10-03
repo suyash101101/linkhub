@@ -8,12 +8,12 @@ import CreateLinkHub from './components/CreateLinkHub';
 import SignInComponent from './components/sign.js';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
-const clerkPubKey='pk_test_Y2FzdWFsLW1vbGx5LTExLmNsZXJrLmFjY291bnRzLmRldiQ'; 
 
+const PUBLISHABLE_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 const App = () => {
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <Router>
         <Navbar />
         <Routes>

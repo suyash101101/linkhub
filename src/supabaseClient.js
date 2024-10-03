@@ -1,7 +1,9 @@
+
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://vunlepqcjoywpimxdica.supabase.co';  // From .env
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1bmxlcHFjam95d3BpbXhkaWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc4Njc0MDMsImV4cCI6MjA0MzQ0MzQwM30.MG7TaF7WMCd36Ni30seU25fqLDwUa1uFmCer5qysZj4';
-const clerkPubKey='pk_test_Y2FzdWFsLW1vbGx5LTExLmNsZXJrLmFjY291bnRzLmRldiQ';  // From .env
+const supabaseUrl = 'https://vunlepqcjoywpimxdica.supabase.co';  
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey, clerkPubKey);
+
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
