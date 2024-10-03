@@ -12,11 +12,11 @@ const Navbar = () => {
         <div className="flex items-center">
           {isSignedIn ? (
             <>
-              <Link to="/create-linkhub" className="text-white mr-4">Create LinkHub</Link>
+              <Link to="/create-linkhub" className="text-black mr-4">Create LinkHub</Link>
               <UserButton />
             </>
           ) : (
-            <Link to="/sign-in" className="text-white">Sign In</Link>
+            <Link to="/sign-in" className="text-black">Sign In</Link>
           )}
         </div>
       </div>
