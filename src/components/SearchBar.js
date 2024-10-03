@@ -1,27 +1,36 @@
 import React, { useState } from 'react';
 
-const SearchBar = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const SearchBar = ({ links }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterBy, setFilterBy] = useState('title');
 
-  const handleSearch = () => {
-    onSearch(searchTerm);
-  };
+    const filteredLinks = links.filter(link => 
+        link[filterBy].toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  return (
-    <div className="search-bar mb-4">
-      <input
-        type="text"
-        placeholder="Search links..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="border p-2 rounded"
-      />
-      <button onClick={handleSearch} className="bg-blue-500 text-white p-2 rounded ml-2">
-        Search
-      </button>
-    </div>
-  );
+    return (
+        <div className="search-bar my-4">
+            <input 
+                type="text"
+                placeholder={`Search by ${filterBy}`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="p-2 border rounded"
+            />
+            <select onChange={(e) => setFilterBy(e.target.value)} className="ml-2 p-2 border rounded">
+                <option value="title">Search by Title</option>
+                <option value="url">Search by URL</option>
+            </select>
+            <ul className="mt-4">
+                {filteredLinks.map((link, index) => (
+                    <li key={index}>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{link.title}</a>
+                    </li>
+                ))}
+            </ul>
+            <button className="search-button" style={{ color: 'black' }}>Search</button>
+        </div>
+    );
 };
 
 export default SearchBar;
-
