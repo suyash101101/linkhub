@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '@clerk/clerk-react';
-import SearchBar from './SearchBar';
+import SearchBar from './SearchBar.js';
 
 const Profile = () => {
   const { username } = useParams();
@@ -23,13 +23,14 @@ const Profile = () => {
       if (!error) {
         setProfile(data);
         setLinks(data.links || []);
+      } else {
+        console.error('Error fetching profile:', error);
       }
     };
-
     fetchProfile();
   }, [username]);
 
-  const isAdmin = profile && profile.userId === userId;
+  const isAdmin = profile && profile.user_id === userId;
 
   const handleEdit = (index) => {
     setEditingIndex(index);
@@ -48,6 +49,8 @@ const Profile = () => {
     if (!error) {
       setLinks(updatedLinks);
       setEditingIndex(null);
+    } else {
+      console.error('Error updating link:', error);
     }
   };
 
@@ -58,7 +61,11 @@ const Profile = () => {
       .update({ links: updatedLinks })
       .eq('username', username);
 
-    if (!error) setLinks(updatedLinks);
+    if (!error) {
+      setLinks(updatedLinks);
+    } else {
+      console.error('Error deleting link:', error);
+    }
   };
 
   const handleAdd = async () => {
@@ -71,13 +78,15 @@ const Profile = () => {
     if (!error) {
       setLinks(updatedLinks);
       setNewLink({ title: '', url: '' });
+    } else {
+      console.error('Error adding link:', error);
     }
   };
 
   if (!profile) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-4">
+    <div className={`container mx-auto p-4 `}>
       <h1 className="text-2xl font-bold mb-4">{username}'s LinkHub</h1>
       <SearchBar links={links} />
 
@@ -89,13 +98,13 @@ const Profile = () => {
                 type="text"
                 value={newLink.title}
                 onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-                className="border p-2 rounded"
+                className="border p-2 rounded text-black"
               />
               <input
                 type="url"
                 value={newLink.url}
                 onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-                className="border p-2 rounded ml-2"
+                className="border p-2 rounded ml-2 text-black"
               />
               <button onClick={() => handleSave(index)} className="ml-2 bg-blue-500 text-white p-2 rounded">
                 Save
@@ -131,14 +140,14 @@ const Profile = () => {
             placeholder="New link title"
             value={newLink.title}
             onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-            className="p-2 border rounded"
+            className="p-2 border rounded text-black"
           />
           <input
             type="url"
             placeholder="New link URL"
             value={newLink.url}
             onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-            className="p-2 border rounded ml-2"
+            className="p-2 border rounded ml-2 text-black"
           />
           <button onClick={handleAdd} className="ml-2 bg-green-500 text-white p-2 rounded">
             Add Link
