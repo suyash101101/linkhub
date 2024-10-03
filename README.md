@@ -74,7 +74,8 @@ src/
    git clone https://github.com/yourusername/linkhub.git
    cd linkhub
 2. Install dependencies
-    npm install
+   ```bash   
+   npm install
 
 3. Deployment (locally)
     npm start
@@ -99,6 +100,6 @@ As an admin of your LinkHub, you can:
 	•	Share your LinkHub URL with others
 
 ## 📧 Contact
-  •	Your Name - @suyash1011101
+  	•	Your Name - @suyash1011101
 	•	Project Link: https://github.com/yourusername/linkhub
 	•	Demo: https://linkhub.vercel.app/
