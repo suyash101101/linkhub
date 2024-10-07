@@ -14,7 +14,6 @@ const Navbar = () => {
           {isSignedIn ? (
             <>
               <Link to="/create-linkhub" className="text-black mr-4">Create LinkHub</Link>
-              <Link to="/create-linkhub" className="text-black mr-4">Create LinkHub</Link>
               <UserButton />
             </>
           ) : (
