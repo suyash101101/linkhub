@@ -7,12 +7,21 @@ const CreateLinkHub = () => {
   const [username, setUsername] = useState('');
   const [links, setLinks] = useState([]);
   const [newLink, setNewLink] = useState({ title: '', url: '', category: '' });
+  const [theme, setTheme] = useState('dark');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useAuth();
   const navigate = useNavigate();
 
   const categories = ['Projects', 'Clubs', 'Research', 'Social Media'];
+  const themes = [
+    { id: 'dark', name: 'Dark', primary: '#1a1a1a', secondary: '#2d2d2d', accent: '#3b82f6' },
+    { id: 'light', name: 'Light', primary: '#ffffff', secondary: '#f0f0f0', accent: '#2563eb' },
+    { id: 'blue', name: 'Blue', primary: '#1e3a8a', secondary: '#2563eb', accent: '#60a5fa' },
+    { id: 'green', name: 'Green', primary: '#064e3b', secondary: '#059669', accent: '#34d399' },
+    { id: 'purple', name: 'Purple', primary: '#4c1d95', secondary: '#7c3aed', accent: '#8b5cf6' },
+    { id: 'red', name: 'Red', primary: '#7f1d1d', secondary: '#dc2626', accent: '#ef4444' }
+  ];
 
   const validateUrl = (url) => {
     try {
@@ -24,7 +33,6 @@ const CreateLinkHub = () => {
   };
 
   const validateUsername = (username) => {
-    // Only allow letters, numbers, and hyphens, 3-30 characters
     const regex = /^[a-zA-Z0-9-]{3,30}$/;
     return regex.test(username);
   };
@@ -67,7 +75,6 @@ const CreateLinkHub = () => {
     setError('');
 
     try {
-      // Check if username already exists
       const { data: existing, error: checkError } = await supabase
         .from('profiles')
         .select('username')
@@ -84,20 +91,19 @@ const CreateLinkHub = () => {
         return;
       }
 
-      // Create new profile with links
       const { error: createError } = await supabase
         .from('profiles')
         .insert([
           {
             username,
             user_id: userId,
-            links
+            links,
+            theme
           }
         ]);
 
       if (createError) throw createError;
 
-      // Redirect to new profile
       navigate(`/profile/${username}`);
     } catch (err) {
       console.error('Error:', err);
@@ -131,6 +137,37 @@ const CreateLinkHub = () => {
               />
               <p className="text-sm text-gray-400 mt-1">
                 3-30 characters, letters, numbers, and hyphens only
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Choose a theme
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {themes.map((themeOption) => (
+                  <button
+                    key={themeOption.id}
+                    type="button"
+                    onClick={() => setTheme(themeOption.id)}
+                    className={`p-4 rounded-lg border-2 relative ${
+                      theme === themeOption.id
+                        ? 'border-blue-500'
+                        : 'border-transparent'
+                    }`}
+                    style={{ background: themeOption.primary }}
+                  >
+                    <span className="sr-only">{themeOption.name}</span>
+                    {theme === themeOption.id && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-400 mt-1">
+                {themes.find(t => t.id === theme)?.name} theme selected
               </p>
             </div>
 

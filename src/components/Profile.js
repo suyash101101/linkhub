@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '../supabaseClient';
+import './Profile.css';  // Make sure to import the CSS file
 
 const SearchBar = ({ links, setFilteredLinks }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,12 +22,12 @@ const SearchBar = ({ links, setFilteredLinks }) => {
         placeholder="Search links..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="flex-1 p-2 bg-gray-700 rounded"
+        className="flex-1 p-2 rounded search-input"
       />
       <select
         value={filterBy}
         onChange={(e) => setFilterBy(e.target.value)}
-        className="p-2 bg-gray-700 rounded"
+        className="p-2 rounded select-input"
       >
         <option value="title">Search by Title</option>
         <option value="url">Search by URL</option>
@@ -46,7 +47,7 @@ const Profile = () => {
   const [newLink, setNewLink] = useState({ title: '', url: '', category: '' });
   const [filteredLinks, setFilteredLinks] = useState([]);
 
-  const categories = ['Projects', 'Clubs', 'Research', 'Social Media', 'others'];
+  const categories = ['Projects', 'Clubs', 'Research', 'Social Media', 'Others'];
 
   useEffect(() => {
     fetchProfile();
@@ -76,6 +77,12 @@ const Profile = () => {
       console.error('Error fetching profile:', err);
       setError('Failed to load profile');
     }
+  };
+
+  // Get theme classes based on profile theme
+  const getThemeClasses = () => {
+    const theme = profile?.theme || 'dark';
+    return `theme-${theme} profile-container`;
   };
 
   const handleAddLink = async (e) => {
@@ -161,12 +168,12 @@ const Profile = () => {
   if (!profile) return <div>Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className={getThemeClasses()}>
       <div className="container mx-auto px-4 py-16">
         <h1 className="text-3xl font-bold mb-8">{username}'s LinkHub</h1>
         
         {error && (
-          <div className="bg-red-500 text-white p-4 rounded-lg mb-4">
+          <div className="bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-lg mb-4">
             {error}
           </div>
         )}
@@ -177,7 +184,7 @@ const Profile = () => {
         />
 
         {isOwner && (
-          <div className="mb-8 bg-gray-800 p-6 rounded-lg">
+          <div className="mb-8 profile-content p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Add New Link</h2>
             <form onSubmit={handleAddLink} className="space-y-4">
               <input
@@ -185,19 +192,19 @@ const Profile = () => {
                 value={newLink.title}
                 onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
                 placeholder="Link Title"
-                className="w-full p-2 bg-gray-700 rounded"
+                className="w-full p-2 rounded input-field"
               />
               <input
                 type="url"
                 value={newLink.url}
                 onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
                 placeholder="URL (https://...)"
-                className="w-full p-2 bg-gray-700 rounded"
+                className="w-full p-2 rounded input-field"
               />
               <select
                 value={newLink.category}
                 onChange={(e) => setNewLink({ ...newLink, category: e.target.value })}
-                className="w-full p-2 bg-gray-700 rounded"
+                className="w-full p-2 rounded select-field"
               >
                 <option value="">Select Category</option>
                 {categories.map(cat => (
@@ -206,7 +213,7 @@ const Profile = () => {
               </select>
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded"
+                className="w-full button-primary py-2 rounded"
               >
                 Add Link
               </button>
@@ -216,7 +223,7 @@ const Profile = () => {
 
         <div className="grid gap-4">
           {filteredLinks.map(link => (
-            <div key={link.id} className="bg-gray-800 p-4 rounded-lg">
+            <div key={link.id} className="link-card p-4 rounded-lg">
               {editingLink?.id === link.id ? (
                 <div className="space-y-2">
                   <input
@@ -226,7 +233,7 @@ const Profile = () => {
                       ...editingLink,
                       tempTitle: e.target.value
                     })}
-                    className="w-full p-2 bg-gray-700 rounded"
+                    className="w-full p-2 rounded input-field"
                   />
                   <input
                     type="url"
@@ -235,7 +242,7 @@ const Profile = () => {
                       ...editingLink,
                       tempUrl: e.target.value
                     })}
-                    className="w-full p-2 bg-gray-700 rounded"
+                    className="w-full p-2 rounded input-field"
                   />
                   <select
                     value={editingLink.tempCategory}
@@ -243,7 +250,7 @@ const Profile = () => {
                       ...editingLink,
                       tempCategory: e.target.value
                     })}
-                    className="w-full p-2 bg-gray-700 rounded"
+                    className="w-full p-2 rounded select-field"
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
@@ -253,13 +260,13 @@ const Profile = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={handleSaveEdit}
-                      className="bg-blue-600 px-4 py-2 rounded"
+                      className="button-primary px-4 py-2 rounded"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setEditingLink(null)}
-                      className="bg-gray-600 px-4 py-2 rounded"
+                      className="button-secondary px-4 py-2 rounded"
                     >
                       Cancel
                     </button>
@@ -272,12 +279,12 @@ const Profile = () => {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xl font-medium hover:text-blue-400"
+                      className="link-title text-xl font-medium hover:opacity-80"
                     >
                       {link.title}
                     </a>
                     {link.category && (
-                      <span className="ml-2 px-2 py-1 bg-gray-700 text-sm rounded">
+                      <span className="link-category ml-2 px-2 py-1 text-sm rounded">
                         {link.category}
                       </span>
                     )}
