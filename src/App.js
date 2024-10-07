@@ -13,12 +13,13 @@ const PUBLISHABLE_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 const App = () => {
   return (
+     // Providing the Clerk context to child components
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <Router>
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/profile/:username" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/:username" element={<ProtectedRoute><Profile /></ProtectedRoute>} />{/* Route for the profile page,createlinkhub protected by authentication */}
           <Route path="/create-linkhub" element={<ProtectedRoute><CreateLinkHub /></ProtectedRoute>} />
           <Route path="/sign-in/*" element={<SignInComponent />} />
         </Routes>
@@ -28,3 +29,7 @@ const App = () => {
 }
 
 export default App;
+//router wraps the application and makes it a (SPA) single page application keeps ui sync w url
+//routes its like a container for route components which define the routes
+//route is a component that renders some UI when its path matches the current URL
+//protected route is a component that checks if the user is authenticated and redirects to the sign in page if not

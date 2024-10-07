@@ -17,8 +17,13 @@ const CreateLinkHub = () => {
   const handleAddLink = (e) => {
     e.preventDefault();
     if (newLink.title && newLink.url) {
-      setLinks([...links, { ...newLink, id: Date.now() }]);
-      setNewLink({ title: '', url: '', category: '' });
+      try {
+        new URL(newLink.url); // Validate the URL
+        setLinks([...links, { ...newLink, id: Date.now() }]);
+        setNewLink({ title: '', url: '', category: '' });
+      } catch (error) {
+        setError('Invalid URL');
+      }
     }
   };
 
