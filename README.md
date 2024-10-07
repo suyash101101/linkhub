@@ -16,7 +16,7 @@ LinkHub is a modern, dark-themed web application that allows users to create and
 
 ## 🚀 Live Demo
 
-https://linkhub.vercel.app/ 
+(https://linkhub.vercel.app/) Live Web app
 
 ## 🛠️ Technology Stack
 
@@ -69,7 +69,7 @@ Individual LinkHub profile with search and link management.(without edit access)
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/linkhub.git
+   git clone https://github.com/suyash101101/linkhub.git
    cd linkhub
 2. Install dependencies
    ```bash   
