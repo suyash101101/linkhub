@@ -12,7 +12,7 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [newLink, setNewLink] = useState({ title: '', url: '', category: '' });
 
-  const categories = ['Projects', 'Clubs', 'Research', 'Social Media'];
+  const categories = ['Projects', 'Clubs', 'Research', 'Social Media','others'];
 
   useEffect(() => {
     fetchProfile();

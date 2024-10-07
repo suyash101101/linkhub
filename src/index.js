@@ -8,3 +8,4 @@ root.render(
     <App />
   </React.StrictMode>
 );
+//react strict mode is a tool for highlighting potential problems in an application
