@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '../supabaseClient';
-import './Profile.css';  // Make sure to import the CSS file
+import './Profile.css';
 
 const SearchBar = ({ links, setFilteredLinks }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,33 +273,23 @@ const Profile = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between items-center">
-                  <div>
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-title text-xl font-medium hover:opacity-80"
-                    >
-                      {link.title}
-                    </a>
-                    {link.category && (
-                      <span className="link-category ml-2 px-2 py-1 text-sm rounded">
-                        {link.category}
-                      </span>
-                    )}
-                  </div>
+                <div className="link-content">
+                  <h3 className="font-bold text-lg">{link.title}</h3>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                    {link.url}
+                  </a>
+                  <p className="text-sm">{link.category}</p>
                   {isOwner && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => handleEditLink(link)}
-                        className="text-blue-400 hover:text-blue-300"
+                        className="button-primary px-2 py-1 rounded"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteLink(link.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="button-secondary px-2 py-1 rounded"
                       >
                         Delete
                       </button>
