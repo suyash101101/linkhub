@@ -2,6 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '../supabaseClient';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import './Profile.css';
 
 const SearchBar = ({ links, setFilteredLinks }) => {
@@ -37,6 +53,59 @@ const SearchBar = ({ links, setFilteredLinks }) => {
   );
 };
 
+const SortableLink = ({ link, isOwner, onEdit, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="link-card p-4 rounded-lg cursor-move"
+      {...attributes}
+    >
+      <div className="flex items-center gap-2">
+        <div {...listeners} className="drag-handle">
+          ⋮⋮
+        </div>
+        <div className="link-content flex-1">
+          <h3 className="font-bold text-lg">{link.title}</h3>
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+            {link.url}
+          </a>
+          <p className="text-sm">{link.category}</p>
+          {isOwner && (
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => onEdit(link)}
+                className="button-primary px-2 py-1 rounded"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(link.id)}
+                className="button-secondary px-2 py-1 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Profile = () => {
   const { username } = useParams();
   const { user } = useUser();
@@ -48,6 +117,13 @@ const Profile = () => {
   const [filteredLinks, setFilteredLinks] = useState([]);
 
   const categories = ['Projects', 'Clubs', 'Research', 'Social Media', 'Others'];
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchProfile();
@@ -79,7 +155,6 @@ const Profile = () => {
     }
   };
 
-  // Get theme classes based on profile theme
   const getThemeClasses = () => {
     const theme = profile?.theme || 'dark';
     return `theme-${theme} profile-container`;
@@ -165,6 +240,32 @@ const Profile = () => {
     }
   };
 
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      const oldIndex = profile.links.findIndex((link) => link.id === active.id);
+      const newIndex = profile.links.findIndex((link) => link.id === over.id);
+      
+      const newLinks = arrayMove(profile.links, oldIndex, newIndex);
+      
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ links: newLinks })
+          .eq('username', username);
+
+        if (error) throw error;
+
+        setProfile({ ...profile, links: newLinks });
+        setFilteredLinks(newLinks);
+      } catch (err) {
+        console.error('Error reordering links:', err);
+        setError('Failed to reorder links');
+      }
+    }
+  };
+
   if (!profile) return <div>Loading...</div>;
 
   return (
@@ -221,85 +322,80 @@ const Profile = () => {
           </div>
         )}
 
-        <div className="grid gap-4">
-          {filteredLinks.map(link => (
-            <div key={link.id} className="link-card p-4 rounded-lg">
-              {editingLink?.id === link.id ? (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={editingLink.tempTitle}
-                    onChange={e => setEditingLink({
-                      ...editingLink,
-                      tempTitle: e.target.value
-                    })}
-                    className="w-full p-2 rounded input-field"
-                  />
-                  <input
-                    type="url"
-                    value={editingLink.tempUrl}
-                    onChange={e => setEditingLink({
-                      ...editingLink,
-                      tempUrl: e.target.value
-                    })}
-                    className="w-full p-2 rounded input-field"
-                  />
-                  <select
-                    value={editingLink.tempCategory}
-                    onChange={e => setEditingLink({
-                      ...editingLink,
-                      tempCategory: e.target.value
-                    })}
-                    className="w-full p-2 rounded select-field"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleSaveEdit}
-                      className="button-primary px-4 py-2 rounded"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setEditingLink(null)}
-                      className="button-secondary px-4 py-2 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="link-content">
-                  <h3 className="font-bold text-lg">{link.title}</h3>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
-                    {link.url}
-                  </a>
-                  <p className="text-sm">{link.category}</p>
-                  {isOwner && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => handleEditLink(link)}
-                        className="button-primary px-2 py-1 rounded"
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={filteredLinks.map(link => link.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="grid gap-4">
+              {filteredLinks.map(link => (
+                editingLink?.id === link.id ? (
+                  <div key={link.id} className="link-card p-4 rounded-lg">
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={editingLink.tempTitle}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempTitle: e.target.value
+                        })}
+                        className="w-full p-2 rounded input-field"
+                      />
+                      <input
+                        type="url"
+                        value={editingLink.tempUrl}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempUrl: e.target.value
+                        })}
+                        className="w-full p-2 rounded input-field"
+                      />
+                      <select
+                        value={editingLink.tempCategory}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempCategory: e.target.value
+                        })}
+                        className="w-full p-2 rounded select-field"
                       >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteLink(link.id)}
-                        className="button-secondary px-2 py-1 rounded"
-                      >
-                        Delete
-                      </button>
+                        <option value="">Select Category</option>
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEdit}
+                          className="button-primary px-4 py-2 rounded"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingLink(null)}
+                          className="button-secondary px-4 py-2 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <SortableLink
+                    key={link.id}
+                    link={link}
+                    isOwner={isOwner}
+                    onEdit={handleEditLink}
+                    onDelete={handleDeleteLink}
+                  />
+                )
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );

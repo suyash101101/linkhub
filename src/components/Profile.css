@@ -84,3 +84,24 @@
     background: var(--bg-secondary);
     color: var(--text-primary);
   }
+  .drag-handle {
+    cursor: grab;
+    color: #666;
+    padding: 0 8px;
+    font-size: 20px;
+    user-select: none;
+  }
+  
+  .link-card {
+    transition: transform 0.2s ease;
+  }
+  
+  .link-card:hover {
+    transform: translateX(4px);
+  }
+  
+  [data-dragging="true"] {
+    cursor: grabbing;
+    opacity: 0.8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
