@@ -3,6 +3,39 @@ import { useParams } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { supabase } from '../supabaseClient';
 
+const SearchBar = ({ links, setFilteredLinks }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('title');
+
+  useEffect(() => {
+    const filtered = links?.filter(link =>
+      link[filterBy]?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+    setFilteredLinks(filtered);
+  }, [searchTerm, filterBy, links, setFilteredLinks]);
+
+  return (
+    <div className="mb-6 flex gap-4">
+      <input
+        type="text"
+        placeholder="Search links..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="flex-1 p-2 bg-gray-700 rounded"
+      />
+      <select
+        value={filterBy}
+        onChange={(e) => setFilterBy(e.target.value)}
+        className="p-2 bg-gray-700 rounded"
+      >
+        <option value="title">Search by Title</option>
+        <option value="url">Search by URL</option>
+        <option value="category">Search by Category</option>
+      </select>
+    </div>
+  );
+};
+
 const Profile = () => {
   const { username } = useParams();
   const { user } = useUser();
@@ -11,8 +44,9 @@ const Profile = () => {
   const [editingLink, setEditingLink] = useState(null);
   const [error, setError] = useState('');
   const [newLink, setNewLink] = useState({ title: '', url: '', category: '' });
+  const [filteredLinks, setFilteredLinks] = useState([]);
 
-  const categories = ['Projects', 'Clubs', 'Research', 'Social Media','others'];
+  const categories = ['Projects', 'Clubs', 'Research', 'Social Media', 'others'];
 
   useEffect(() => {
     fetchProfile();
@@ -21,6 +55,9 @@ const Profile = () => {
   useEffect(() => {
     if (profile && user) {
       setIsOwner(profile.user_id === user.id);
+    }
+    if (profile?.links) {
+      setFilteredLinks(profile.links);
     }
   }, [profile, user]);
 
@@ -34,6 +71,7 @@ const Profile = () => {
 
       if (error) throw error;
       setProfile(data);
+      setFilteredLinks(data.links || []);
     } catch (err) {
       console.error('Error fetching profile:', err);
       setError('Failed to load profile');
@@ -55,6 +93,7 @@ const Profile = () => {
       if (error) throw error;
 
       setProfile({ ...profile, links: updatedLinks });
+      setFilteredLinks(updatedLinks);
       setNewLink({ title: '', url: '', category: '' });
     } catch (err) {
       console.error('Error adding link:', err);
@@ -92,6 +131,7 @@ const Profile = () => {
       if (error) throw error;
 
       setProfile({ ...profile, links: updatedLinks });
+      setFilteredLinks(updatedLinks);
       setEditingLink(null);
     } catch (err) {
       console.error('Error saving edit:', err);
@@ -111,6 +151,7 @@ const Profile = () => {
       if (error) throw error;
 
       setProfile({ ...profile, links: updatedLinks });
+      setFilteredLinks(updatedLinks);
     } catch (err) {
       console.error('Error deleting link:', err);
       setError('Failed to delete link');
@@ -129,6 +170,11 @@ const Profile = () => {
             {error}
           </div>
         )}
+
+        <SearchBar 
+          links={profile.links || []} 
+          setFilteredLinks={setFilteredLinks} 
+        />
 
         {isOwner && (
           <div className="mb-8 bg-gray-800 p-6 rounded-lg">
@@ -169,7 +215,7 @@ const Profile = () => {
         )}
 
         <div className="grid gap-4">
-          {profile.links && profile.links.map(link => (
+          {filteredLinks.map(link => (
             <div key={link.id} className="bg-gray-800 p-4 rounded-lg">
               {editingLink?.id === link.id ? (
                 <div className="space-y-2">
