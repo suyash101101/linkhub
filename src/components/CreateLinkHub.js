@@ -14,17 +14,36 @@ const CreateLinkHub = () => {
 
   const categories = ['Projects', 'Clubs', 'Research', 'Social Media'];
 
+  const validateUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const validateUsername = (username) => {
+    // Only allow letters, numbers, and hyphens, 3-30 characters
+    const regex = /^[a-zA-Z0-9-]{3,30}$/;
+    return regex.test(username);
+  };
+
   const handleAddLink = (e) => {
     e.preventDefault();
-    if (newLink.title && newLink.url) {
-      try {
-        new URL(newLink.url); // Validate the URL
-        setLinks([...links, { ...newLink, id: Date.now() }]);
-        setNewLink({ title: '', url: '', category: '' });
-      } catch (error) {
-        setError('Invalid URL');
-      }
+    if (!newLink.title || !newLink.url) {
+      setError('Title and URL are required');
+      return;
     }
+
+    if (!validateUrl(newLink.url)) {
+      setError('Please enter a valid URL (including http:// or https://)');
+      return;
+    }
+
+    setLinks([...links, { ...newLink, id: Date.now() }]);
+    setNewLink({ title: '', url: '', category: '' });
+    setError('');
   };
 
   const handleRemoveLink = (id) => {
@@ -33,16 +52,31 @@ const CreateLinkHub = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateUsername(username)) {
+      setError('Username must be 3-30 characters long and can only contain letters, numbers, and hyphens');
+      return;
+    }
+
+    if (!userId) {
+      setError('You must be signed in to create a LinkHub');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       // Check if username already exists
-      const { data: existing } = await supabase
+      const { data: existing, error: checkError } = await supabase
         .from('profiles')
         .select('username')
         .eq('username', username)
         .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
 
       if (existing) {
         setError('Username already taken');
@@ -57,7 +91,7 @@ const CreateLinkHub = () => {
           {
             username,
             user_id: userId,
-            links: links
+            links
           }
         ]);
 
@@ -66,8 +100,8 @@ const CreateLinkHub = () => {
       // Redirect to new profile
       navigate(`/profile/${username}`);
     } catch (err) {
-      setError('Failed to create LinkHub');
       console.error('Error:', err);
+      setError(err.message || 'Failed to create LinkHub. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -88,13 +122,16 @@ const CreateLinkHub = () => {
                 id="username"
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="your-username"
                 required
-                pattern="[a-zA-Z0-9-]+"
-                title="Only letters, numbers, and hyphens allowed"
+                minLength={3}
+                maxLength={30}
               />
+              <p className="text-sm text-gray-400 mt-1">
+                3-30 characters, letters, numbers, and hyphens only
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -164,13 +201,15 @@ const CreateLinkHub = () => {
             </div>
 
             {error && (
-              <p className="text-red-400 text-sm">{error}</p>
+              <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded-lg">
+                {error}
+              </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors disabled:opacity"
+              className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Creating...' : 'Create LinkHub'}
             </button>
