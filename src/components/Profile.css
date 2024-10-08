@@ -1,9 +1,9 @@
 .theme-dark {
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
-    --text-primary: #ffffff;
+    --text-primary: grey;
     --text-secondary: #a0a0a0;
-    --accent: #3b82f6;
+    --accent: white;
   }
   
   .theme-light {
@@ -17,7 +17,7 @@
   .theme-blue {
     --bg-primary: #1e3a8a;
     --bg-secondary: #2563eb;
-    --text-primary: #ffffff;
+    --text-primary: black;
     --text-secondary: #93c5fd;
     --accent: #60a5fa;
   }
@@ -25,7 +25,7 @@
   .theme-green {
     --bg-primary: #064e3b;
     --bg-secondary: #059669;
-    --text-primary: #ffffff;
+    --text-primary: black;
     --text-secondary: #6ee7b7;
     --accent: #34d399;
   }
@@ -33,7 +33,7 @@
   .theme-purple {
     --bg-primary: #4c1d95;
     --bg-secondary: #7c3aed;
-    --text-primary: #ffffff;
+    --text-primary: black;
     --text-secondary: #c4b5fd;
     --accent: #8b5cf6;
   }
@@ -41,7 +41,7 @@
   .theme-red {
     --bg-primary: #7f1d1d;
     --bg-secondary: #dc2626;
-    --text-primary: #ffffff;
+    --text-primary: black;
     --text-secondary: #fca5a5;
     --accent: #ef4444;
   }
@@ -84,18 +84,6 @@
     background: var(--bg-secondary);
     color: var(--text-primary);
   }
-  .drag-handle {
-    cursor: grab;
-    color: #666;
-    padding: 0 8px;
-    font-size: 20px;
-    user-select: none;
-  }
-  
-  .link-card {
-    transition: transform 0.2s ease;
-  }
-  
   .link-card:hover {
     transform: translateX(4px);
   }
