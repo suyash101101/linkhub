@@ -292,36 +292,35 @@ const Profile = () => {
 
         {isOwner && (
           <div className="mb-6 sm:mb-8 profile-content p-4 sm:p-6 rounded-lg">
-            <form onSubmit={handleAddLink} className="flex flex-col gap-2">
+            <h2 className="text-xl font-bold mb-4">Add New Link</h2>
+            <form onSubmit={handleAddLink} className="space-y-4">
               <input
                 type="text"
-                placeholder="Link Title"
                 value={newLink.title}
                 onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-                className="p-2 rounded input-field w-full"
+                placeholder="Link Title"
+                className="w-full p-2 rounded input-field"
               />
               <input
                 type="url"
-                placeholder="Link URL"
                 value={newLink.url}
                 onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-                className="p-2 rounded input-field w-full"
+                placeholder="URL (https://...)"
+                className="w-full p-2 rounded input-field"
               />
               <select
                 value={newLink.category}
                 onChange={(e) => setNewLink({ ...newLink, category: e.target.value })}
-                className="p-2 rounded select-input w-full"
+                className="w-full p-2 rounded select-field"
               >
                 <option value="">Select Category</option>
-                {categories.map((category, idx) => (
-                  <option key={idx} value={category}>
-                    {category}
-                  </option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
-              <button 
-                type="submit" 
-                className="button-primary px-4 py-2 rounded mt-2 w-full"
+              <button
+                type="submit"
+                className="w-full button-primary py-2 rounded"
               >
                 Add Link
               </button>
@@ -335,18 +334,72 @@ const Profile = () => {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={filteredLinks.map((link) => link.id)}
+            items={filteredLinks.map(link => link.id)}
             strategy={verticalListSortingStrategy}
           >
-            {filteredLinks.map((link) => (
-              <SortableLink
-                key={link.id}
-                link={link}
-                isOwner={isOwner}
-                onEdit={handleEditLink}
-                onDelete={handleDeleteLink}
-              />
-            ))}
+            <div className="grid gap-4">
+              {filteredLinks.map(link => (
+                editingLink?.id === link.id ? (
+                  <div key={link.id} className="link-card p-4 rounded-lg">
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={editingLink.tempTitle}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempTitle: e.target.value
+                        })}
+                        className="w-full p-2 rounded input-field"
+                      />
+                      <input
+                        type="url"
+                        value={editingLink.tempUrl}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempUrl: e.target.value
+                        })}
+                        className="w-full p-2 rounded input-field"
+                      />
+                      <select
+                        value={editingLink.tempCategory}
+                        onChange={e => setEditingLink({
+                          ...editingLink,
+                          tempCategory: e.target.value
+                        })}
+                        className="w-full p-2 rounded select-field"
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEdit}
+                          className="button-primary px-4 py-2 rounded"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingLink(null)}
+                          className="button-secondary px-4 py-2 rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <SortableLink
+                    key={link.id}
+                    link={link}
+                    isOwner={isOwner}
+                    onEdit={handleEditLink}
+                    onDelete={handleDeleteLink}
+                  />
+                )
+              ))}
+            </div>
           </SortableContext>
         </DndContext>
       </div>
