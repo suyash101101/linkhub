@@ -54,7 +54,7 @@ const Home = () => {
           </p>
           <div className="space-x-4">
             <Link
-              to={isSignedIn ? "/create" : "/sign-up"}
+              to={isSignedIn ? "/create-linkhub" : "/sign-up"}
               className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
             >
               {isSignedIn ? "Create New LinkHub" : "Get Started"}
