@@ -9,6 +9,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  TouchSensor,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -32,18 +33,18 @@ const SearchBar = ({ links, setFilteredLinks }) => {
   }, [searchTerm, filterBy, links, setFilteredLinks]);
 
   return (
-    <div className="mb-6 flex gap-4">
+    <div className="mb-4 flex flex-col sm:flex-row gap-2">
       <input
         type="text"
         placeholder="Search links..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="flex-1 p-2 rounded search-input"
+        className="flex-1 p-2 rounded search-input w-full"
       />
       <select
         value={filterBy}
         onChange={(e) => setFilterBy(e.target.value)}
-        className="p-2 rounded select-input"
+        className="p-2 rounded select-input w-full sm:w-auto"
       >
         <option value="title">Search by Title</option>
         <option value="url">Search by URL</option>
@@ -60,27 +61,31 @@ const SortableLink = ({ link, isOwner, onEdit, onDelete }) => {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: link.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
     <div 
       ref={setNodeRef} 
       style={style} 
-      className="link-card p-4 rounded-lg cursor-move"
+      className={`link-card p-4 rounded-lg ${isDragging ? 'shadow-lg' : ''}`}
       {...attributes}
     >
       <div className="flex items-center gap-2">
-        <div {...listeners} className="drag-handle">
-          ⋮⋮
-        </div>
+        {isOwner && (
+          <div {...listeners} className="drag-handle cursor-move">
+            ⋮⋮
+          </div>
+        )}
         <div className="link-content flex-1">
           <h3 className="font-bold text-lg">{link.title}</h3>
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 break-all">
             {link.url}
           </a>
           <p className="text-sm">{link.category}</p>
@@ -122,7 +127,8 @@ const Profile = () => {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
+    useSensor(TouchSensor)
   );
 
   useEffect(() => {
@@ -270,8 +276,8 @@ const Profile = () => {
 
   return (
     <div className={getThemeClasses()}>
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-3xl font-bold mb-8">{username}'s LinkHub</h1>
+      <div className="container mx-auto px-4 py-8 sm:py-16">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">{username}'s LinkHub</h1>
         
         {error && (
           <div className="bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-lg mb-4">
@@ -285,7 +291,7 @@ const Profile = () => {
         />
 
         {isOwner && (
-          <div className="mb-8 profile-content p-6 rounded-lg">
+          <div className="mb-6 sm:mb-8 profile-content p-4 sm:p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Add New Link</h2>
             <form onSubmit={handleAddLink} className="space-y-4">
               <input
