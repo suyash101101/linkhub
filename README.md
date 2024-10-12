@@ -16,7 +16,7 @@ LinkHub is a modern, dark-themed web application that allows users to create and
 
 ## 🚀 Live Demo
 
-(https://linkhub.vercel.app/) Live Web app
+https://linkhub.vercel.app/ : Live Web app
 
 ## 🛠️ Technology Stack
 
